@@ -1,34 +1,41 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import '../styles/Paintings.css'; // Create the CSS file for styling
-
-const imagePath = process.env.PUBLIC_URL + '/images/';
-
-const paintings = [
-  { id: 1, title: 'Sunset in Venice', image: `${imagePath}artwork1.jpg`, price: 500, artist: 'John Doe' },
-  { id: 2, title: 'Abstract Thoughts', image: `${imagePath}artwork2.jpg`, price: 300, artist: 'Jane Smith' },
-  { id: 3, title: 'The Color Wheel', image: `${imagePath}artwork3.jpeg`, price: 150, artist: 'Bob Ross' },
-  { id: 4, title: 'Nature’s Dream', image: `${imagePath}artwork4.jpg`, price: 450, artist: 'Alice Green' },
-  // Add more paintings as needed
-];
+import React, { useEffect, useState } from 'react';
+import ArtworkCard from '../components/ArtworkCard';
+import '../styles/Paintings.css';
 
 const Paintings = () => {
+  const [artworks, setArtworks] = useState([]);
+
+  useEffect(() => {
+    // Fetch artworks in the "Paintings" category from the backend
+    fetch('http://localhost:8081/api/artworks/category/Paintings')
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Failed to fetch paintings');
+      })
+      .then((data) => setArtworks(data))
+      .catch((error) => console.error('Error fetching paintings:', error));
+  }, []);
+
   return (
-    <div className="paintings-container">
+    <div className="paintings-page">
       <h2 className="page-title">Explore Our Paintings</h2>
-      <div className="paintings-grid">
-        {paintings.map((painting) => (
-          <div key={painting.id} className="painting-card">
-            <Link to={`/product/${painting.id}`}>
-              <img src={painting.image} alt={painting.title} className="painting-image" />
-              <div className="painting-info">
-                <h3>{painting.title}</h3>
-                <p>By {painting.artist}</p>
-                <p>${painting.price}</p>
-              </div>
-            </Link>
-          </div>
-        ))}
+      <div className="artworks-grid">
+        {artworks.length > 0 ? (
+          artworks.map((artwork) => (
+            <ArtworkCard
+              key={artwork.id}
+              id={artwork.id}
+              title={artwork.title}
+              price={artwork.price}
+              artist={artwork.artist}
+              onAddToCart={(item) => console.log('Added to cart:', item)}
+            />
+          ))
+        ) : (
+          <p>No paintings found in this category.</p>
+        )}
       </div>
     </div>
   );

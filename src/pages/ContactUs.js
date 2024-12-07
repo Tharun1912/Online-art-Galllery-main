@@ -1,14 +1,40 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { init, sendForm } from 'emailjs-com';
 import '../styles/ContactUs.css'; // Ensure this file contains your CSS for the component
 
 const ContactUs = () => {
+  const form = useRef();
+
   const backgroundImage = process.env.PUBLIC_URL + '/images/artwork1.jpg'; // Dynamic path for the image in the public folder
 
+  const submitHandler = (e) => {
+    e.preventDefault();
+
+    sendForm(
+      'service_jo1s7td', // Your EmailJS service ID
+      'template_rhxwsdv', // Your EmailJS template ID
+      form.current,
+      '6t83MR4Ga0yhvW7SJ' // Your EmailJS public key
+    )
+      .then(
+        () => {
+          console.log('SUCCESS!');
+          alert('Message sent successfully!');
+        },
+        (error) => {
+          console.log('FAILED...', error.text);
+          alert('Failed to send message. Please try again.');
+        }
+      );
+  };
+
   return (
-    <div 
-      className="contact-us" 
-      style={{ 
-        backgroundImage: `url(${backgroundImage})` // Inline background image style
+    <div
+      className="contact-us"
+      style={{
+        backgroundImage: `url(${backgroundImage})`, // Corrected syntax for background image
+        backgroundSize: 'cover', // Ensure the background covers the div
+        backgroundPosition: 'center',
       }}
     >
       {/* Contact Info Section */}
@@ -43,10 +69,10 @@ const ContactUs = () => {
       {/* Contact Form Section */}
       <div className="contact-form">
         <h2>Send Message</h2>
-        <form>
-          <input type="text" placeholder="Full Name" required />
-          <input type="email" placeholder="Email" required />
-          <textarea placeholder="Type your Message..." required></textarea>
+        <form ref={form} onSubmit={submitHandler}>
+          <input type="text" name="from_name" placeholder="Full Name" required />
+          <input type="email" name="reply_to" placeholder="Email" required />
+          <textarea name="message" placeholder="Type your Message..." required></textarea>
           <button type="submit">Send</button>
         </form>
       </div>

@@ -9,6 +9,9 @@ const UploadArtwork = () => {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Paintings'); // Default category
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false); // Loading state
+  const [error, setError] = useState(null); // Error state
+  const [success, setSuccess] = useState(false); // Success state
 
   const handleFileChange = (event) => {
     setImage(event.target.files[0]);
@@ -16,9 +19,13 @@ const UploadArtwork = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true); // Set loading to true during submission
+    setError(null); // Reset error state
+    setSuccess(false); // Reset success state
 
     if (!image) {
-      alert('Please upload at least one image');
+      alert('Please upload an image.');
+      setLoading(false);
       return;
     }
 
@@ -36,18 +43,32 @@ const UploadArtwork = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log('Artwork uploaded:', response.data);
+      setSuccess(true); // Set success state
       alert('Artwork uploaded successfully!');
+      console.log('Response:', response.data);
+
+      // Reset form fields after successful upload
+      setTitle('');
+      setArtist('');
+      setPrice('');
+      setDescription('');
+      setCategory('Paintings');
+      setImage(null);
     } catch (error) {
-      console.error('Error uploading artwork:', error);
-      alert('Error uploading artwork');
+      console.error('Error uploading artwork:', error.response?.data || error.message);
+      setError('Failed to upload artwork. Please check your inputs and try again.');
+    } finally {
+      setLoading(false); // Always set loading to false at the end
     }
   };
 
   return (
     <div className="upload-artwork-container">
       <h2 className="upload-artwork-title">Upload Artwork</h2>
-      
+
+      {error && <p className="error-message">{error}</p>}
+      {success && <p className="success-message">Artwork uploaded successfully!</p>}
+
       <form className="upload-artwork-form" onSubmit={handleSubmit}>
         <label htmlFor="title" className="form-label">Title</label>
         <input
@@ -79,6 +100,7 @@ const UploadArtwork = () => {
           placeholder="Enter price"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+          min="0"
           required
         />
 
@@ -114,7 +136,13 @@ const UploadArtwork = () => {
           required
         />
 
-        <button type="submit" className="form-submit-button">Upload Artwork</button>
+        <button
+          type="submit"
+          className="form-submit-button"
+          disabled={loading}
+        >
+          {loading ? 'Uploading...' : 'Upload Artwork'}
+        </button>
       </form>
     </div>
   );

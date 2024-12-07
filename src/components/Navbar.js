@@ -90,10 +90,10 @@ const Navbar = ({ onSearch, cartQuantity }) => {
       </nav>
 
       <div className="navbar-items">
-        <Link to="/Paintings">Paintings</Link>
+        <Link to="/paintings">Paintings</Link>
         <Link to="/sculptures">Sculptures</Link>
         <Link to="/exhibitions">Exhibitions</Link>
-        <Link to="/VirtualTours">Virtual Tours</Link>
+        <Link to="/virtualtours">Virtual Tours</Link>
         <Link to="/featured">Featured Art Works</Link>
         <Link to="/blogs">Blogs</Link>
 

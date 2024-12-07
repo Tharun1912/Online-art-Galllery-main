@@ -1,31 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/ArtworkCard.css';
 
-const ArtworkCard = ({ id, image, title, price, artist, onAddToCart }) => {
+const ArtworkCard = ({ id, title, price, artist, onAddToCart }) => {
+  const [imageSrc, setImageSrc] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Fetch the image Blob
+    fetch(`http://localhost:8081/api/artworks/${id}/image`)
+      .then((response) => {
+        if (response.ok) return response.blob();
+        throw new Error('Failed to fetch image');
+      })
+      .then((blob) => setImageSrc(URL.createObjectURL(blob)))
+      .catch((error) => console.error('Error fetching artwork image:', error));
+  }, [id]);
+
   const handleCardClick = () => {
-    navigate(`/product/${id}`); // Redirect to the product page
+    navigate(`/product/${id}`); // Navigate to ProductPage with the artwork ID
   };
 
   return (
     <div className="artwork-card" onClick={handleCardClick}>
-      {/* Image and details */}
       <div className="image-box">
-        <img src={image} alt={title} className="artwork-image" />
+        {imageSrc ? (
+          <img src={imageSrc} alt={title} className="artwork-image" />
+        ) : (
+          <p>Loading image...</p>
+        )}
       </div>
       <div className="content">
         <h3>{title}</h3>
         <p>By {artist}</p>
         <p>${price}</p>
       </div>
-      {/* Add to Cart button - prevent navigation when clicked */}
-      <button 
-        className="cart-button" 
+      <button
+        className="cart-button"
         onClick={(e) => {
-          e.stopPropagation(); // Prevent navigation when clicking "Add to Cart"
-          onAddToCart({ id, image, title, price, artist });
+          e.stopPropagation();
+          onAddToCart({ id, image: imageSrc, title, price, artist });
         }}
       >
         Add to Cart

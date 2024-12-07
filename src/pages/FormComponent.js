@@ -55,12 +55,9 @@ const CardSide = styled.div`
   backface-visibility: hidden;
 `;
 
-const CardFront = styled(CardSide)`
-  background-color: #2b2e38;
-`;
+const CardFront = styled(CardSide)``;
 
 const CardBack = styled(CardSide)`
-  background-color: #2b2e38;
   transform: rotateY(180deg);
 `;
 
@@ -94,6 +91,7 @@ const Input = styled.input`
   margin-bottom: 20px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6), -2px -2px 10px rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
+
   &:focus {
     outline: none;
     border-bottom: 2px solid #ffeba7;
@@ -113,6 +111,7 @@ const Button = styled.button`
   font-size: 18px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6), -2px -2px 10px rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
+
   &:hover {
     background-color: #000;
     color: #ffeba7;
@@ -142,6 +141,7 @@ const Select = styled.select`
   max-width: 400px;
   border: 2px solid #ffeba7;
   margin-bottom: 20px;
+
   &:focus {
     outline: none;
     border-color: #ffeba7;
@@ -203,7 +203,6 @@ function FormComponent() {
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-  
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
@@ -211,7 +210,7 @@ function FormComponent() {
 
   useEffect(() => {
     if (location.pathname === '/signup') {
-      setClick(true); 
+      setClick(true);
     } else {
       setClick(false);
     }
@@ -224,36 +223,18 @@ function FormComponent() {
 
   const handleLogin = () => {
     const loginData = { email: loginEmail, password: loginPassword };
-    
-    axios.post('http://localhost:8080/api/users/login', loginData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      withCredentials: true, // Include credentials in request
-    })
-    .then(response => {
-      const data = response.data;
-      console.log('Login response data:', data);
-      
-      if (data.token) {
-        // Store token, role, name, and email
+
+    axios.post('http://localhost:8080/api/users/login', loginData)
+      .then(response => {
+        const data = response.data;
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', data.role);
-        localStorage.setItem('name', data.name);  // Ensure the name is being set
+        localStorage.setItem('name', data.name);
         localStorage.setItem('email', loginEmail);
-
-        console.log('Login successful, token stored:', data.token);
-        alert('Login successful!');
-        navigate('/', { state: { name: data.name } });
-        window.location.reload();  // Reload to update Navbar with the new state
-      } else {
-        throw new Error('No token received in the response');
-      }
-    })
-    .catch(error => {
-      console.error('Login error:', error.message);
-      alert('Login failed: ' + error.message);
-    });
+        navigate('/');
+        window.location.reload();
+      })
+      .catch(error => alert(`Login failed: ${error.message}`));
   };
 
   const handleSignup = () => {
@@ -264,26 +245,14 @@ function FormComponent() {
       role: signupRole,
     };
 
-    axios.post('http://localhost:8080/api/users/signup', signupData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      withCredentials: true, // Include credentials in request
-    })
-    .then(response => {
-      const data = response.data;
-      localStorage.setItem('role', data.role);
-      localStorage.setItem('email', signupEmail);  // Store the email for future use
-      localStorage.setItem('name', signupName); // Ensure the name is stored
-
-      window.location.reload();
-      alert(data.message || 'Signup successful!');
-      navigate('/');
-    })
-    .catch(error => {
-      console.error('Signup error:', error.message);
-      alert(error.message);
-    });
+    axios.post('http://localhost:8080/api/users/signup', signupData)
+      .then(() => {
+        localStorage.setItem('email', signupEmail);
+        localStorage.setItem('name', signupName);
+        navigate('/');
+        window.location.reload();
+      })
+      .catch(error => alert(`Signup failed: ${error.message}`));
   };
 
   return (
@@ -301,21 +270,11 @@ function FormComponent() {
 
       <Card3DWrap>
         <Card3DWrapper $clicked={click}>
-          <CardFront style={{ visibility: click ? "hidden" : "visible", zIndex: click ? 0 : 1 }}>
+          <CardFront>
             <Form>
               <Title>Log In</Title>
-              <Input 
-                type="email" 
-                placeholder="Email" 
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-              />
-              <Input 
-                type="password" 
-                placeholder="Password" 
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-              />
+              <Input type="email" placeholder="Email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
+              <Input type="password" placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
               <Button type="button" onClick={handleLogin}>Login</Button>
               <ForgotPassword>
                 <button onClick={() => alert("Forgot password clicked!")}>Forgot your password?</button>
@@ -323,27 +282,12 @@ function FormComponent() {
             </Form>
           </CardFront>
 
-          <CardBack style={{ visibility: click ? "visible" : "hidden", zIndex: click ? 1 : 0 }}>
-            <Form id="signup">
+          <CardBack>
+            <Form>
               <Title>Sign Up</Title>
-              <Input 
-                type="text" 
-                placeholder="Full Name" 
-                value={signupName}
-                onChange={(e) => setSignupName(e.target.value)}
-              />
-              <Input 
-                type="email" 
-                placeholder="Email" 
-                value={signupEmail}
-                onChange={(e) => setSignupEmail(e.target.value)}
-              />
-              <Input 
-                type="password" 
-                placeholder="Password" 
-                value={signupPassword}
-                onChange={(e) => setSignupPassword(e.target.value)}
-              />
+              <Input type="text" placeholder="Full Name" value={signupName} onChange={(e) => setSignupName(e.target.value)} />
+              <Input type="email" placeholder="Email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} />
+              <Input type="password" placeholder="Password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} />
               <Select value={signupRole} onChange={(e) => setSignupRole(e.target.value)}>
                 <option value="ROLE_USER">User</option>
                 <option value="ROLE_ARTIST">Artist</option>

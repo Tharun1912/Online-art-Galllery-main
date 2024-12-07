@@ -1,30 +1,41 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import '../styles/Sculptures.css'; // Import CSS file for Sculptures page
+import React, { useEffect, useState } from 'react';
+import ArtworkCard from '../components/ArtworkCard';
+import '../styles/Sculptures.css';
 
 const Sculptures = () => {
-  // Simulated sculpture data
-  const sculptures = [
-    { id: 1, image: '/images/sculpture1.png', title: 'The Thinker', artist: 'Auguste Rodin', price: 2000 },
-    { id: 2, image: '/images/sculpture2.jpg', title: 'David', artist: 'Michelangelo', price: 2500 },
-    { id: 3, image: '/images/sculpture3.avif', title: 'Venus de Milo', artist: 'Alexandros of Antioch', price: 1800 },
-    { id: 4, image: '/images/sculpture4.avif', title: 'Discobolus', artist: 'Myron', price: 2200 }
-  ];
+  const [artworks, setArtworks] = useState([]);
+
+  useEffect(() => {
+    // Fetch sculptures data from the backend
+    fetch('http://localhost:8081/api/artworks/category/Sculptures')
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Failed to fetch sculptures');
+      })
+      .then((data) => setArtworks(data))
+      .catch((error) => console.error('Error fetching sculptures:', error));
+  }, []);
 
   return (
-    <div className="sculptures-container">
+    <div className="sculptures-page">
       <h2 className="page-title">Explore Our Sculptures</h2>
-      <div className="sculptures-grid">
-        {sculptures.map((sculpture) => (
-          <Link to={`/product/${sculpture.id}`} key={sculpture.id} className="sculpture-card">
-            <img src={sculpture.image} alt={sculpture.title} className="sculpture-image" />
-            <div className="sculpture-info">
-              <h3>{sculpture.title}</h3>
-              <p>By {sculpture.artist}</p>
-              <p>${sculpture.price}</p>
-            </div>
-          </Link>
-        ))}
+      <div className="artworks-grid">
+        {artworks.length > 0 ? (
+          artworks.map((artwork) => (
+            <ArtworkCard
+              key={artwork.id}
+              id={artwork.id}
+              title={artwork.title}
+              price={artwork.price}
+              artist={artwork.artist}
+              onAddToCart={(item) => console.log('Added to cart:', item)}
+            />
+          ))
+        ) : (
+          <p>No sculptures found in this category.</p>
+        )}
       </div>
     </div>
   );

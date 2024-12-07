@@ -1,69 +1,41 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
+import React, { useEffect, useState } from 'react';
+import ArtworkCard from '../components/ArtworkCard';
 import '../styles/FeaturedArtworks.css';
 
-const featuredArtworks = [
-  {
-    id: 1,
-    image: '/images/artwork1.jpg',
-    title: 'Sunset Over the City',
-    artist: 'John Doe',
-    price: '$500',
-  },
-  {
-    id: 2,
-    image: '/images/artwork2.jpg',
-    title: 'Abstract Reality',
-    artist: 'Jane Smith',
-    price: '$300',
-  },
-  {
-    id: 3,
-    image: '/images/artwork3.jpeg',
-    title: 'The Color Explosion',
-    artist: 'Bob Ross',
-    price: '$450',
-  },
-  {
-    id: 4,
-    image: '/images/artwork4.jpg',
-    title: 'Modern Sculpture',
-    artist: 'Sarah Wilson',
-    price: '$700',
-  },
-  // Add more featured artworks as needed
-];
-
 const FeaturedArtworks = () => {
-  const navigate = useNavigate(); // Initialize the navigate hook
+  const [artworks, setArtworks] = useState([]);
 
-  // Handle artwork click, redirecting to product page
-  const handleArtworkClick = (id) => {
-    navigate(`/product/${id}`); // Redirect to the product page with the artwork id
-  };
+  useEffect(() => {
+    // Fetch digital arts data from the backend
+    fetch('http://localhost:8081/api/artworks/category/Digital Arts')
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Failed to fetch featured artworks');
+      })
+      .then((data) => setArtworks(data))
+      .catch((error) => console.error('Error fetching featured artworks:', error));
+  }, []);
 
   return (
-    <div className="featured-artworks-container">
-      <h1 className="page-title">Featured Artworks</h1>
+    <div className="featured-artworks-page">
+      <h2 className="page-title">Explore Featured Artworks</h2>
       <div className="artworks-grid">
-        {featuredArtworks.map((artwork) => (
-          <div 
-            key={artwork.id} 
-            className="artwork-card" 
-            onClick={() => handleArtworkClick(artwork.id)} // Navigate when the card is clicked
-          >
-            <img
-              src={artwork.image}
-              alt={artwork.title}
-              className="artwork-image"
+        {artworks.length > 0 ? (
+          artworks.map((artwork) => (
+            <ArtworkCard
+              key={artwork.id}
+              id={artwork.id}
+              title={artwork.title}
+              price={artwork.price}
+              artist={artwork.artist}
+              onAddToCart={(item) => console.log('Added to cart:', item)}
             />
-            <div className="artwork-info">
-              <h3>{artwork.title}</h3>
-              <p>By {artwork.artist}</p>
-              <p>{artwork.price}</p>
-            </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>No featured artworks found in this category.</p>
+        )}
       </div>
     </div>
   );
